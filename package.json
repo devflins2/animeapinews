@@ -1,7 +1,7 @@
 {
-  "name": "todayanimenews-post-generator",
+  "name": "anireport-post-generator",
   "version": "1.0.0",
-  "description": "Instagram Anime News Post Generator in TodayAnimeNews Style powered by real-time anime news API",
+  "description": "Instagram Anime News Post Generator in AniReport Style powered by real-time anime news API",
   "main": "server.js",
   "scripts": {
     "dev": "node server.js",
@@ -22,7 +22,7 @@
     "news",
     "instagram",
     "generator",
-    "todayanimenews"
+    "anireport"
   ],
   "author": "Antigravity",
   "license": "MIT"

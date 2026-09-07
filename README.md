@@ -1,4 +1,4 @@
-# 🔥 AniNews Studio & Instagram Post Generator REST API
+# 🔥 AniReport Studio & Instagram Post Generator REST API
 
 <div align="center">
 
@@ -9,7 +9,7 @@
 
 <p align="center">
   <b>Real-Time Anime News Aggregator & Automated Instagram Graphic Post Generator</b><br/>
-  Styled in the high-engagement format of <code>@todayanimenews</code>.
+  Styled in the high-engagement format of <code>@anireport</code>.
 </p>
 
 </div>
@@ -20,8 +20,8 @@
 
 - 📰 **Multi-Source Aggregation**: Real-time anime news from *Anime News Network, MyAnimeList, Anime UK News, Honey's Anime, and more*.
 - 🖼️ **100% Unique HD Posters**: Extracts original, authentic anime key visuals and trailer screenshots for every single article (zero duplicate placeholders).
-- 🎨 **Signature @todayanimenews Design**:
-  - Custom Branding Header (`@TODAYANIMENEWS` or your custom handle).
+- 🎨 **Signature @anireport Design**:
+  - Custom Branding Header (`@ANIREPORT` or your custom handle).
   - Glowing Category Badges (`OFFICIAL ANNOUNCEMENT`, `TRAILER`, `RELEASE DATE`, `ANIME MOVIE`, `SEASON ANNOUNCEMENT`).
   - Bold Typography with deep drop-shadows & dark gradient backdrop.
   - Source attribution & Social follow footer.
@@ -77,7 +77,7 @@ Returns latest anime news articles with their **direct generated image URLs** an
 | Param | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `limit` | number | `20` | Number of articles to return |
-| `handle` | string | `@TODAYANIMENEWS` | Custom watermark handle |
+| `handle` | string | `@ANIREPORT` | Custom watermark handle |
 | `ratio` | string | `4:5` | `4:5`, `1:1`, or `9:16` |
 | `source` | string | `all` | Filter by source (e.g. `ann`, `myanimelist`) |
 | `search` | string | - | Keyword search in titles/excerpts |
@@ -97,8 +97,8 @@ Returns latest anime news articles with their **direct generated image URLs** an
       "badge": "OFFICIAL TRAILER",
       "badgeColor": "#FF4757",
       "original_image_url": "https://cdn.animenewsnetwork.com/thumbnails/...",
-      "generated_image_url": "http://localhost:3000/api/v1/posts/ann-v5r7syx/image?ratio=4:5&handle=@TODAYANIMENEWS",
-      "instagram_caption": "🔥 BREAKING: The Seven Knights of the Marronnier Kingdom Anime Reveals 2nd Trailer\n\n👉 Follow @TODAYANIMENEWS for more updates!",
+      "generated_image_url": "http://localhost:3000/api/v1/posts/ann-v5r7syx/image?ratio=4:5&handle=@ANIREPORT",
+      "instagram_caption": "🔥 BREAKING: The Seven Knights of the Marronnier Kingdom Anime Reveals 2nd Trailer\n\n👉 Follow @ANIREPORT for more updates!",
       "link": "https://www.animenewsnetwork.com/..."
     }
   ]

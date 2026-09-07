@@ -3,7 +3,7 @@ const state = {
   newsList: [],
   selectedNews: null,
   ratio: '4:5',
-  handle: '@TODAYANIMENEWS',
+  handle: '@ANIREPORT',
   badge: 'OFFICIAL ANNOUNCEMENT',
   badgeColor: '#E50914',
   title: 'Solo Leveling: Arise from the Shadow Season 2 Finale Shatters Global Streaming Records',
@@ -70,7 +70,7 @@ function setupEventListeners() {
 
   // Form Inputs
   handleInput.addEventListener('input', (e) => {
-    state.handle = e.target.value.trim() || '@TODAYANIMENEWS';
+    state.handle = e.target.value.trim() || '@ANIREPORT';
     renderCanvas();
   });
 
@@ -561,7 +561,7 @@ function syncFormWithState() {
 }
 
 function resetToDefault() {
-  state.handle = '@TODAYANIMENEWS';
+  state.handle = '@ANIREPORT';
   state.badge = 'OFFICIAL ANNOUNCEMENT';
   state.badgeColor = '#E50914';
   state.ratio = '4:5';
@@ -597,7 +597,7 @@ ${state.excerpt}
 .
 .
 .
-#animenews #anime #otaku #manga #${state.source.toLowerCase().replace(/[^a-z0-9]/g, '')} #animeupdate #animelover #animecommunity #todayanimenews #weeb`;
+#animenews #anime #otaku #manga #${state.source.toLowerCase().replace(/[^a-z0-9]/g, '')} #animeupdate #animelover #animecommunity #anireport #weeb`;
 
   navigator.clipboard.writeText(caption).then(() => {
     showToast('📋 Instagram Caption & Hashtags Copied!');

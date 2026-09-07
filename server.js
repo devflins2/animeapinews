@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
  * Helper to build Instagram caption
  */
 function buildCaption(title, excerpt, source, handle) {
-  const cleanHandle = handle || '@TODAYANIMENEWS';
+  const cleanHandle = handle || '@ANIREPORT';
   return `🔥 BREAKING: ${title}
 
 📖 Details:
@@ -29,7 +29,7 @@ ${excerpt}
 .
 .
 .
-#animenews #anime #otaku #manga #${(source || 'anime').toLowerCase().replace(/[^a-z0-9]/g, '')} #animeupdate #animelover #animecommunity #todayanimenews #weeb`;
+#animenews #anime #otaku #manga #${(source || 'anime').toLowerCase().replace(/[^a-z0-9]/g, '')} #animeupdate #animelover #animecommunity #anireport #weeb`;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -42,7 +42,7 @@ ${excerpt}
  */
 app.get('/api/v1/posts', async (req, res) => {
   try {
-    const { source, search, limit = 20, refresh, handle = '@TODAYANIMENEWS', ratio = '4:5' } = req.query;
+    const { source, search, limit = 20, refresh, handle = '@ANIREPORT', ratio = '4:5' } = req.query;
     const protocol = req.protocol;
     const host = req.get('host');
     const baseUrl = `${protocol}://${host}`;
@@ -98,7 +98,7 @@ app.get('/api/v1/posts', async (req, res) => {
  */
 app.get('/api/v1/posts/latest/image', async (req, res) => {
   try {
-    const { handle = '@TODAYANIMENEWS', ratio = '4:5', badge, badgeColor } = req.query;
+    const { handle = '@ANIREPORT', ratio = '4:5', badge, badgeColor } = req.query;
     const news = await getAllNews(false);
 
     if (!news || news.length === 0) {
@@ -133,7 +133,7 @@ app.get('/api/v1/posts/latest/image', async (req, res) => {
 app.get('/api/v1/posts/:id/image', async (req, res) => {
   try {
     const { id } = req.params;
-    const { handle = '@TODAYANIMENEWS', ratio = '4:5', badge, badgeColor } = req.query;
+    const { handle = '@ANIREPORT', ratio = '4:5', badge, badgeColor } = req.query;
     
     const news = await getAllNews(false);
     const item = news.find(n => n.id === id);
@@ -173,7 +173,7 @@ app.post('/api/v1/generate-custom', async (req, res) => {
       excerpt = 'Exclusive new details on the upcoming release.',
       image,
       source = 'Anime News',
-      handle = '@TODAYANIMENEWS',
+      handle = '@ANIREPORT',
       badge,
       badgeColor,
       ratio = '4:5'

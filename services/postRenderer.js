@@ -77,7 +77,7 @@ function detectBadge(title = '', tags = []) {
  * @param {string} options.excerpt - Short summary
  * @param {string} options.image - Poster/Key Visual URL or Buffer
  * @param {string} options.source - News source name (e.g., Crunchyroll)
- * @param {string} options.handle - Page handle (e.g., @todayanimenews)
+ * @param {string} options.handle - Page handle (e.g., @anireport)
  * @param {string} options.badge - Custom badge text
  * @param {string} options.badgeColor - Custom badge color
  * @param {string} options.ratio - '4:5' (1080x1350), '1:1' (1080x1080), or '9:16' (1080x1920)
@@ -89,7 +89,7 @@ async function renderPost(options = {}) {
     excerpt = 'Details regarding the latest anime adaptation, release schedule and production updates.',
     image = 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200&q=80',
     source = 'Anime News Network',
-    handle = '@TODAYANIMENEWS',
+    handle = '@ANIREPORT',
     ratio = '4:5'
   } = options;
 
@@ -164,7 +164,7 @@ async function renderPost(options = {}) {
   ctx.fillStyle = bottomGrad;
   ctx.fillRect(0, gradStartY, width, height - gradStartY);
 
-  // 4. Header Bar (@todayanimenews style branding)
+  // 4. Header Bar (@anireport style branding)
   const headerY = 60;
 
   // Header Brand Badge

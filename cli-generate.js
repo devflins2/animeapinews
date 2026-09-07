@@ -31,7 +31,7 @@ async function runCli() {
         excerpt: item.excerpt,
         image: item.image,
         source: item.source,
-        handle: '@TODAYANIMENEWS',
+        handle: '@ANIREPORT',
         ratio: '4:5'
       });
 
