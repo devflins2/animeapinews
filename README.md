@@ -93,12 +93,13 @@ Returns latest anime news articles with their **direct generated image URLs** an
       "id": "ann-v5r7syx",
       "title": "The Seven Knights of the Marronnier Kingdom Anime Reveals 2nd Trailer",
       "excerpt": "New cast members and opening theme song announced for the upcoming fantasy anime.",
+      "content": "Official production committee revealed the second promotional video featuring full voice cast announcements and the official opening theme song.",
       "source": "Anime News Network",
       "badge": "OFFICIAL TRAILER",
       "badgeColor": "#FF4757",
       "original_image_url": "https://cdn.animenewsnetwork.com/thumbnails/...",
       "generated_image_url": "http://localhost:3000/api/v1/posts/ann-v5r7syx/image?ratio=4:5&handle=@ANIREPORT",
-      "instagram_caption": "🔥 BREAKING: The Seven Knights of the Marronnier Kingdom Anime Reveals 2nd Trailer\n\n👉 Follow @ANIREPORT for more updates!",
+      "instagram_caption": "🔥 BREAKING ANIME NEWS: The Seven Knights of the Marronnier Kingdom Anime Reveals 2nd Trailer\n\n📖 Full Story & Official Details:\n...",
       "link": "https://www.animenewsnetwork.com/..."
     }
   ]
@@ -107,7 +108,12 @@ Returns latest anime news articles with their **direct generated image URLs** an
 
 ---
 
-### 2. `GET /api/v1/posts/latest/image`
+### 2. `GET /api/v1/posts/:id`
+Returns the **100% full complete news article**, paragraphs, and metadata for a specific article ID.
+
+---
+
+### 3. `GET /api/v1/posts/latest/image`
 **Direct Image Route:** Returns the actual **PNG image** (`image/png`) of the latest breaking news post.
 
 ```html
@@ -117,7 +123,7 @@ Returns latest anime news articles with their **direct generated image URLs** an
 
 ---
 
-### 3. `GET /api/v1/posts/:id/image`
+### 4. `GET /api/v1/posts/:id/image`
 Returns the rendered PNG graphic for a specific article ID.
 
 ---

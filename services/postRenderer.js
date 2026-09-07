@@ -25,6 +25,7 @@ async function fetchImageBuffer(imageUrl) {
  * Word wrap helper for canvas context
  */
 function wrapText(ctx, text, maxWidth) {
+  if (!text) return [];
   const words = text.split(' ');
   const lines = [];
   let currentLine = words[0] || '';
@@ -70,13 +71,13 @@ function detectBadge(title = '', tags = []) {
 }
 
 /**
- * Render Instagram News Post
+ * Render Instagram News Post with Full Text Clarity
  * 
  * @param {Object} options
- * @param {string} options.title - News headline
- * @param {string} options.excerpt - Short summary
+ * @param {string} options.title - News headline in English
+ * @param {string} options.excerpt - Complete news summary
  * @param {string} options.image - Poster/Key Visual URL or Buffer
- * @param {string} options.source - News source name (e.g., Crunchyroll)
+ * @param {string} options.source - News source name (e.g., Anime News Network)
  * @param {string} options.handle - Page handle (e.g., @anireport)
  * @param {string} options.badge - Custom badge text
  * @param {string} options.badgeColor - Custom badge color
@@ -104,6 +105,10 @@ async function renderPost(options = {}) {
 
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
+
+  // Enable Ultra-HD image smoothing & crisp rendering
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
   // 1. Background base
   ctx.fillStyle = '#0a0a0f';
@@ -136,7 +141,7 @@ async function renderPost(options = {}) {
         drawW = width;
         drawH = width / imgAspect;
         offsetX = 0;
-        offsetY = 0; // Focus on top/center of image
+        offsetY = 0;
       }
 
       ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
@@ -146,20 +151,20 @@ async function renderPost(options = {}) {
   }
 
   // 3. Cinematic Vignette & Deep Bottom Gradient
-  // Top gradient for header watermark clarity
   const topGrad = ctx.createLinearGradient(0, 0, 0, 180);
-  topGrad.addColorStop(0, 'rgba(0, 0, 0, 0.85)');
+  topGrad.addColorStop(0, 'rgba(0, 0, 0, 0.88)');
   topGrad.addColorStop(0.6, 'rgba(0, 0, 0, 0.4)');
   topGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
   ctx.fillStyle = topGrad;
   ctx.fillRect(0, 0, width, 180);
 
-  // Main dark gradient overlay starting from 35% height
-  const gradStartY = height * 0.32;
+  // Gradient starts at 30% height for complete coverage of text area
+  const gradStartY = height * 0.28;
   const bottomGrad = ctx.createLinearGradient(0, gradStartY, 0, height);
   bottomGrad.addColorStop(0, 'rgba(5, 5, 8, 0)');
-  bottomGrad.addColorStop(0.35, 'rgba(5, 5, 8, 0.7)');
-  bottomGrad.addColorStop(0.7, 'rgba(5, 5, 8, 0.95)');
+  bottomGrad.addColorStop(0.25, 'rgba(5, 5, 8, 0.65)');
+  bottomGrad.addColorStop(0.55, 'rgba(5, 5, 8, 0.92)');
+  bottomGrad.addColorStop(0.85, '#050508');
   bottomGrad.addColorStop(1, '#050508');
   ctx.fillStyle = bottomGrad;
   ctx.fillRect(0, gradStartY, width, height - gradStartY);
@@ -167,19 +172,19 @@ async function renderPost(options = {}) {
   // 4. Header Bar (@anireport style branding)
   const headerY = 60;
 
-  // Header Brand Badge
+  // Header Brand Red Badge
   ctx.save();
   ctx.fillStyle = '#E50914';
   ctx.beginPath();
-  ctx.roundRect(50, headerY - 24, 40, 40, 8);
+  ctx.roundRect(50, headerY - 24, 42, 42, 10);
   ctx.fill();
 
   // Play/Flame symbol icon inside badge
   ctx.fillStyle = '#ffffff';
   ctx.beginPath();
-  ctx.moveTo(64, headerY - 14);
-  ctx.lineTo(78, headerY - 4);
-  ctx.lineTo(64, headerY + 6);
+  ctx.moveTo(65, headerY - 14);
+  ctx.lineTo(80, headerY - 3);
+  ctx.lineTo(65, headerY + 8);
   ctx.closePath();
   ctx.fill();
 
@@ -188,7 +193,7 @@ async function renderPost(options = {}) {
   ctx.fillStyle = '#ffffff';
   ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
   ctx.shadowBlur = 8;
-  ctx.fillText(handle.replace('@', '').toUpperCase(), 102, headerY + 5);
+  ctx.fillText(handle.replace('@', '').toUpperCase(), 106, headerY + 6);
 
   // "NEWS" or "UPDATES" Pill on Right
   const rightPillText = 'DAILY UPDATES';
@@ -197,19 +202,19 @@ async function renderPost(options = {}) {
   
   ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
   ctx.beginPath();
-  ctx.roundRect(width - 50 - pillW, headerY - 20, pillW, 32, 16);
+  ctx.roundRect(width - 50 - pillW, headerY - 20, pillW, 34, 17);
   ctx.fill();
 
   ctx.fillStyle = '#ffffff';
-  ctx.fillText(rightPillText, width - 50 - pillW + 12, headerY + 2);
+  ctx.fillText(rightPillText, width - 50 - pillW + 12, headerY + 3);
   ctx.restore();
 
   // 5. Category Badge (e.g. OFFICIAL ANNOUNCEMENT / TRAILER)
   const badgeInfo = detectBadge(title);
-  const badgeText = options.badge || badgeInfo.text;
+  const badgeText = (options.badge || badgeInfo.text).toUpperCase();
   const badgeColor = options.badgeColor || badgeInfo.color;
 
-  const contentStartY = height - 480;
+  const contentStartY = ratio === '9:16' ? height - 600 : (ratio === '1:1' ? height - 420 : height - 520);
 
   ctx.save();
   ctx.font = 'bold 20px "Arial", sans-serif';
@@ -239,31 +244,32 @@ async function renderPost(options = {}) {
   ctx.shadowBlur = 16;
   ctx.shadowOffsetY = 4;
 
-  let fontSize = 46;
-  if (title.length > 90) fontSize = 38;
-  if (title.length > 130) fontSize = 34;
+  let fontSize = 44;
+  if (title.length > 80) fontSize = 38;
+  if (title.length > 120) fontSize = 32;
 
   ctx.font = `bold ${fontSize}px "Arial", sans-serif`;
-  const maxTextWidth = width - 100; // 50px padding on each side
+  const maxTextWidth = width - 100;
   const titleLines = wrapText(ctx, title, maxTextWidth).slice(0, 3);
 
-  let textY = badgeY + badgeHeight + 45;
+  let textY = badgeY + badgeHeight + 42;
   for (const line of titleLines) {
     ctx.fillText(line, 50, textY);
     textY += fontSize + 12;
   }
   ctx.restore();
 
-  // 7. News Excerpt / Summary
+  // 7. News Excerpt / Summary (Complete English story)
   if (excerpt && ratio !== '1:1') {
     ctx.save();
     ctx.font = '22px "Arial", sans-serif';
-    ctx.fillStyle = 'rgba(230, 230, 240, 0.88)';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.fillStyle = 'rgba(230, 230, 245, 0.92)';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
     ctx.shadowBlur = 8;
 
-    const excerptLines = wrapText(ctx, excerpt, maxTextWidth).slice(0, 2);
-    textY += 10;
+    const maxExcerptLines = ratio === '9:16' ? 4 : 3;
+    const excerptLines = wrapText(ctx, excerpt, maxTextWidth).slice(0, maxExcerptLines);
+    textY += 12;
     for (const line of excerptLines) {
       ctx.fillText(line, 50, textY);
       textY += 32;
@@ -272,10 +278,9 @@ async function renderPost(options = {}) {
   }
 
   // 8. Footer Section with Divider & Social CTA
-  const footerY = height - 65;
+  const footerY = height - 60;
 
-  // Thin separator line
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(50, footerY - 30);

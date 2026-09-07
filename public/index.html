@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AniReport Studio - Instagram Anime News Generator & REST API</title>
+  <title>AniReport Studio - Instagram Anime News Generator & Complete News API</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,12 +18,23 @@
         <div class="brand-badge">🔥</div>
         <div>
           <h1>AniReport <span>Studio & API</span></h1>
-          <p class="tagline">Instagram Anime News Post Generator & REST API • @anireport</p>
+          <p class="tagline">100% English Anime News • Complete Stories & Automated Instagram Post Generator</p>
         </div>
       </div>
       <div class="header-actions">
+        <div class="status-indicators">
+          <span id="schedulerStatusBadge" class="status-pill active" title="Automatically fetches fresh news and generates HD posts every 2 hours">
+            <span class="status-dot"></span> 2h Auto-Poster Active
+          </span>
+          <span id="storageStatusBadge" class="status-pill" title="Auto-pruning active (keeps latest 25 posts)">
+            💾 Storage: <b id="storageSizeText">0 MB</b>
+          </span>
+        </div>
+        <button id="btnTriggerCron" class="btn btn-secondary" title="Force run the 2-Hour Auto-Poster now">
+          <span class="icon">⚡</span> Run 2h Auto-Fetch
+        </button>
         <button id="btnOpenApiDocs" class="btn btn-secondary" style="border-color: #E50914; color: #ff5252;">
-          <span class="icon">⚡</span> REST API Docs
+          <span class="icon">📜</span> API Docs
         </button>
         <button id="btnRefreshNews" class="btn btn-secondary">
           <span class="icon">🔄</span> Refresh News
@@ -37,14 +48,14 @@
       <!-- Left Column: Live News Feed -->
       <section class="panel news-panel">
         <div class="panel-header">
-          <h2>📰 Live Anime News</h2>
+          <h2>📰 Live Anime News (English)</h2>
           <span id="newsCountBadge" class="count-badge">Loading...</span>
         </div>
         
         <div class="search-filter-box">
           <input type="text" id="searchInput" placeholder="Search news (e.g. Solo Leveling, Demon Slayer)...">
           <select id="sourceFilter">
-            <option value="">All Sources</option>
+            <option value="">All Verified Sources</option>
             <option value="ann">Anime News Network</option>
             <option value="myanimelist">MyAnimeList</option>
             <option value="animeuknews">Anime UK News</option>
@@ -55,12 +66,12 @@
         <div id="newsList" class="news-list">
           <div class="loading-state">
             <div class="spinner"></div>
-            <p>Fetching real-time anime news with unique pictures...</p>
+            <p>Fetching real-time complete anime news in English...</p>
           </div>
         </div>
       </section>
 
-      <!-- Center Column: Post Preview Canvas -->
+      <!-- Center Column: Post Preview Canvas & Actions -->
       <section class="panel preview-panel">
         <div class="preview-toolbar">
           <div class="ratio-selectors">
@@ -88,15 +99,18 @@
             <span class="icon">📥</span> Download HD Post (PNG)
           </button>
           <button id="btnCopyCaption" class="btn btn-secondary">
-            <span class="icon">📋</span> Copy IG Caption
+            <span class="icon">📋</span> Copy Full Caption & Tags
+          </button>
+          <button id="btnCopyArticle" class="btn btn-secondary">
+            <span class="icon">📖</span> Copy Full Story Text
           </button>
         </div>
       </section>
 
-      <!-- Right Column: Customization Controls -->
+      <!-- Right Column: Customization Controls & Full Story -->
       <section class="panel controls-panel">
         <div class="panel-header">
-          <h2>⚙️ Post Customizer</h2>
+          <h2>⚙️ Post Customizer & Full Story</h2>
           <button id="btnResetDefault" class="btn-text">Reset</button>
         </div>
 
@@ -124,17 +138,26 @@
 
           <!-- News Headline -->
           <div class="form-group">
-            <label for="titleInput">Headline (Title)</label>
-            <textarea id="titleInput" rows="3" placeholder="Enter bold anime news headline..."></textarea>
+            <label for="titleInput">Headline (Title in English)</label>
+            <textarea id="titleInput" rows="2" placeholder="Enter bold anime news headline..."></textarea>
           </div>
 
           <!-- Excerpt -->
           <div class="form-group">
-            <label for="excerptInput">Summary / Excerpt</label>
-            <textarea id="excerptInput" rows="3" placeholder="Brief summary of the news..."></textarea>
+            <label for="excerptInput">Post Summary (Rendered on Image)</label>
+            <textarea id="excerptInput" rows="3" placeholder="Complete 2-3 sentence summary..."></textarea>
           </div>
 
-          <!-- Source -->
+          <!-- Full Article Content -->
+          <div class="form-group">
+            <div class="label-with-action">
+              <label for="contentInput">Full Complete Story (Article Body)</label>
+              <button type="button" id="btnQuickCopyContent" class="btn-text-small">Copy Text</button>
+            </div>
+            <textarea id="contentInput" rows="6" placeholder="Complete detailed article paragraphs and official info..."></textarea>
+          </div>
+
+          <!-- Source & Link -->
           <div class="form-group">
             <label for="sourceInput">Source Name</label>
             <input type="text" id="sourceInput" value="Anime News Network">
@@ -161,19 +184,25 @@
     <div id="apiModal" class="modal-overlay">
       <div class="modal-content">
         <div class="modal-header">
-          <h2>⚡ AniNews REST API Documentation</h2>
+          <h2>⚡ AniNews REST API Documentation (100% English & Complete Stories)</h2>
           <button id="btnCloseApiDocs" class="btn-close">&times;</button>
         </div>
         <div class="modal-body">
-          <p class="modal-desc">Use these REST API endpoints in your <b>Mobile App, Discord/Telegram Bot, Website, or Automation Scripts</b> to fetch news with auto-generated Instagram pictures!</p>
+          <p class="modal-desc">Use these REST API endpoints in your <b>Mobile App, Discord/Telegram Bot, Website, or Automation Scripts</b> to fetch complete English news with auto-generated Instagram pictures & captions!</p>
 
           <div class="api-endpoint-card">
             <div class="endpoint-badge get">GET</div>
             <code>/api/v1/posts</code>
-            <p>Returns a list of anime news articles, each with its <b>direct generated post image URL</b>, caption, and metadata.</p>
+            <p>Returns a list of anime news articles in clean English with <b>excerpt</b>, <b>full content story</b>, direct generated post image URLs, and ready-to-use captions.</p>
             <div class="code-block">
               <code>fetch('http://localhost:3000/api/v1/posts?limit=10&handle=@mybrand')<br>  .then(res => res.json())<br>  .then(data => console.log(data.data));</code>
             </div>
+          </div>
+
+          <div class="api-endpoint-card">
+            <div class="endpoint-badge get">GET</div>
+            <code>/api/v1/posts/:id</code>
+            <p>Returns the <b>100% full complete news article</b> and paragraphs for a specific article ID.</p>
           </div>
 
           <div class="api-endpoint-card">

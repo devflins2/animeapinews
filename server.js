@@ -2,8 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const axios = require('axios');
-const { getAllNews } = require('./services/newsAggregator');
+const { getAllNews, getNewsById } = require('./services/newsAggregator');
 const { renderPost, detectBadge } = require('./services/postRenderer');
+const { startScheduler, runAutoJob, getSchedulerStatus } = require('./services/scheduler');
+const { cleanStorage, getStorageStats } = require('./services/storageManager');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,22 +16,25 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 /**
- * Helper to build Instagram caption
+ * Helper to build comprehensive full-length Instagram caption in clean English
  */
-function buildCaption(title, excerpt, source, handle) {
+function buildCaption(title, excerpt, content, source, handle) {
   const cleanHandle = handle || '@ANIREPORT';
-  return `🔥 BREAKING: ${title}
+  const fullDetails = content && content.length > (excerpt || '').length ? content : (excerpt || title);
+  
+  return `🔥 BREAKING ANIME NEWS: ${title}
 
-📖 Details:
-${excerpt}
+📖 Full Story & Official Details:
+${fullDetails}
 
 📌 Source: ${source}
+⚡ Coverage: 100% Verified Anime News
 
-👉 Follow ${cleanHandle} for more daily anime updates, release dates, and trailers!
+👉 Follow ${cleanHandle} for daily breaking anime updates, official trailers, cast reveals, and release schedules!
 .
 .
 .
-#animenews #anime #otaku #manga #${(source || 'anime').toLowerCase().replace(/[^a-z0-9]/g, '')} #animeupdate #animelover #animecommunity #anireport #weeb`;
+#animenews #anime #otaku #manga #${(source || 'anime').toLowerCase().replace(/[^a-z0-9]/g, '')} #animecommunity #animelover #animeupdate #weeb #anireport`;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -38,7 +43,7 @@ ${excerpt}
 
 /**
  * 1. GET /api/v1/posts
- * Returns a list of latest news articles with their DIRECT generated image URLs and ready-to-use captions!
+ * Returns a list of latest news articles with complete English text, direct image URLs, full story, and captions!
  */
 app.get('/api/v1/posts', async (req, res) => {
   try {
@@ -55,7 +60,11 @@ app.get('/api/v1/posts', async (req, res) => {
 
     if (search) {
       const q = search.toLowerCase();
-      news = news.filter(item => item.title.toLowerCase().includes(q) || item.excerpt.toLowerCase().includes(q));
+      news = news.filter(item => 
+        item.title.toLowerCase().includes(q) || 
+        (item.excerpt && item.excerpt.toLowerCase().includes(q)) ||
+        (item.content && item.content.toLowerCase().includes(q))
+      );
     }
 
     const total = news.length;
@@ -67,6 +76,7 @@ app.get('/api/v1/posts', async (req, res) => {
         id: item.id,
         title: item.title,
         excerpt: item.excerpt,
+        content: item.content || item.excerpt,
         source: item.source,
         date: item.date,
         tags: item.tags,
@@ -74,7 +84,7 @@ app.get('/api/v1/posts', async (req, res) => {
         badgeColor: badgeInfo.color,
         original_image_url: item.image,
         generated_image_url: `${baseUrl}/api/v1/posts/${encodeURIComponent(item.id)}/image?ratio=${encodeURIComponent(ratio)}&handle=${encodeURIComponent(handle)}`,
-        instagram_caption: buildCaption(item.title, item.excerpt, item.source, handle),
+        instagram_caption: buildCaption(item.title, item.excerpt, item.content, item.source, handle),
         link: item.link
       };
     });
@@ -92,9 +102,50 @@ app.get('/api/v1/posts', async (req, res) => {
 });
 
 /**
- * 2. GET /api/v1/posts/latest/image
- * DIRECT IMAGE ENDPOINT: Returns the actual PNG graphic for the latest breaking anime news!
- * Perfect for <img src="...">, Discord/Telegram bots, or webhooks.
+ * 2. GET /api/v1/posts/:id
+ * Returns the FULL complete article story and detailed metadata
+ */
+app.get('/api/v1/posts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { handle = '@ANIREPORT', ratio = '4:5' } = req.query;
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const baseUrl = `${protocol}://${host}`;
+
+    const item = await getNewsById(id);
+    if (!item) {
+      return res.status(404).json({ status: 'error', message: `Article with ID '${id}' not found` });
+    }
+
+    const badgeInfo = detectBadge(item.title);
+    res.json({
+      status: 'success',
+      data: {
+        id: item.id,
+        title: item.title,
+        excerpt: item.excerpt,
+        content: item.content || item.excerpt,
+        source: item.source,
+        date: item.date,
+        tags: item.tags,
+        badge: badgeInfo.text,
+        badgeColor: badgeInfo.color,
+        original_image_url: item.image,
+        generated_image_url: `${baseUrl}/api/v1/posts/${encodeURIComponent(item.id)}/image?ratio=${encodeURIComponent(ratio)}&handle=${encodeURIComponent(handle)}`,
+        instagram_caption: buildCaption(item.title, item.excerpt, item.content, item.source, handle),
+        link: item.link
+      }
+    });
+  } catch (err) {
+    console.error('API /v1/posts/:id error:', err);
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+/**
+ * 3. GET /api/v1/posts/latest/image
+ * DIRECT IMAGE ENDPOINT: Returns the actual Ultra HD PNG graphic for the latest breaking anime news!
  */
 app.get('/api/v1/posts/latest/image', async (req, res) => {
   try {
@@ -127,16 +178,15 @@ app.get('/api/v1/posts/latest/image', async (req, res) => {
 });
 
 /**
- * 3. GET /api/v1/posts/:id/image
- * DIRECT IMAGE ENDPOINT: Returns the actual PNG graphic for a specific news article ID!
+ * 4. GET /api/v1/posts/:id/image
+ * DIRECT IMAGE ENDPOINT: Returns the actual Ultra HD PNG graphic for a specific news article ID!
  */
 app.get('/api/v1/posts/:id/image', async (req, res) => {
   try {
     const { id } = req.params;
     const { handle = '@ANIREPORT', ratio = '4:5', badge, badgeColor } = req.query;
     
-    const news = await getAllNews(false);
-    const item = news.find(n => n.id === id);
+    const item = await getNewsById(id);
 
     if (!item) {
       return res.status(404).json({ status: 'error', message: `Article with ID '${id}' not found` });
@@ -163,7 +213,7 @@ app.get('/api/v1/posts/:id/image', async (req, res) => {
 });
 
 /**
- * 4. POST /api/v1/generate-custom
+ * 5. POST /api/v1/generate-custom
  * Custom image generator endpoint: Send your own title, excerpt, image URL, and receive the rendered PNG!
  */
 app.post('/api/v1/generate-custom', async (req, res) => {
@@ -203,6 +253,61 @@ app.post('/api/v1/generate-custom', async (req, res) => {
   }
 });
 
+// ══════════════════════════════════════════════════════════════
+// ⚙️ SYSTEM & AUTOMATION ENDPOINTS (2-HOUR CRON & STORAGE)
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * 6. GET /api/v1/system/status
+ * Returns 2-hour scheduler info, next run time, and storage health metrics
+ */
+app.get('/api/v1/system/status', (req, res) => {
+  try {
+    const status = getSchedulerStatus();
+    res.json({
+      status: 'success',
+      data: status
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+/**
+ * 7. POST /api/v1/system/run-cron
+ * Manually triggers the 2-hour news fetching & auto-posting job
+ */
+app.post('/api/v1/system/run-cron', async (req, res) => {
+  try {
+    const result = await runAutoJob(req.body.count || 3);
+    res.json({
+      status: 'success',
+      message: '2-Hour Auto-Scheduler job triggered successfully',
+      result
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+/**
+ * 8. POST /api/v1/system/cleanup
+ * Manually triggers storage pruning to free disk space
+ */
+app.post('/api/v1/system/cleanup', (req, res) => {
+  try {
+    const maxPosts = req.body.maxPosts || 25;
+    const result = cleanStorage(maxPosts);
+    res.json({
+      status: 'success',
+      message: `Storage cleanup executed. Kept latest ${maxPosts} posts.`,
+      result
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
 /**
  * Backward compatibility: GET /api/news
  */
@@ -217,7 +322,11 @@ app.get('/api/news', async (req, res) => {
 
     if (search) {
       const q = search.toLowerCase();
-      news = news.filter(item => item.title.toLowerCase().includes(q) || item.excerpt.toLowerCase().includes(q));
+      news = news.filter(item => 
+        item.title.toLowerCase().includes(q) || 
+        (item.excerpt && item.excerpt.toLowerCase().includes(q)) ||
+        (item.content && item.content.toLowerCase().includes(q))
+      );
     }
 
     res.json({
@@ -263,5 +372,9 @@ app.listen(PORT, () => {
   console.log(`👉 Web Studio:  http://localhost:${PORT}`);
   console.log(`👉 REST API:    http://localhost:${PORT}/api/v1/posts`);
   console.log(`👉 Direct Pic:  http://localhost:${PORT}/api/v1/posts/latest/image`);
+  console.log(`👉 System Stat: http://localhost:${PORT}/api/v1/system/status`);
   console.log(`======================================================\n`);
+
+  // Start background 2-hour scheduler
+  startScheduler();
 });

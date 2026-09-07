@@ -5,6 +5,7 @@ package-lock.json
 # Generated Output files
 output_posts/*
 !output_posts/.gitkeep
+posted_history.json
 
 # Environment variables
 .env
