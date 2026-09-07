@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AniNews Studio - Instagram Post Generator (@todayanimenews style)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Navigation -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-badge">🔥</div>
+        <div>
+          <h1>AniNews <span>Studio & API</span></h1>
+          <p class="tagline">Instagram Anime News Post Generator & REST API • @todayanimenews style</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btnOpenApiDocs" class="btn btn-secondary" style="border-color: #E50914; color: #ff5252;">
+          <span class="icon">⚡</span> REST API Docs
+        </button>
+        <button id="btnRefreshNews" class="btn btn-secondary">
+          <span class="icon">🔄</span> Refresh News
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace Grid -->
+    <main class="workspace-grid">
+      
+      <!-- Left Column: Live News Feed -->
+      <section class="panel news-panel">
+        <div class="panel-header">
+          <h2>📰 Live Anime News</h2>
+          <span id="newsCountBadge" class="count-badge">Loading...</span>
+        </div>
+        
+        <div class="search-filter-box">
+          <input type="text" id="searchInput" placeholder="Search news (e.g. Solo Leveling, Demon Slayer)...">
+          <select id="sourceFilter">
+            <option value="">All Sources</option>
+            <option value="ann">Anime News Network</option>
+            <option value="myanimelist">MyAnimeList</option>
+            <option value="animeuknews">Anime UK News</option>
+            <option value="honeysanime">Honey's Anime</option>
+          </select>
+        </div>
+
+        <div id="newsList" class="news-list">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Fetching real-time anime news with unique pictures...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Center Column: Post Preview Canvas -->
+      <section class="panel preview-panel">
+        <div class="preview-toolbar">
+          <div class="ratio-selectors">
+            <button class="ratio-btn active" data-ratio="4:5">
+              <span>📱 4:5 Portrait</span>
+              <small>1080 × 1350 (IG Post)</small>
+            </button>
+            <button class="ratio-btn" data-ratio="1:1">
+              <span>⬛ 1:1 Square</span>
+              <small>1080 × 1080</small>
+            </button>
+            <button class="ratio-btn" data-ratio="9:16">
+              <span>🎬 9:16 Story</span>
+              <small>1080 × 1920 (Story/Reel)</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="canvas-wrapper">
+          <canvas id="postCanvas" width="1080" height="1350"></canvas>
+        </div>
+
+        <div class="action-bar">
+          <button id="btnDownload" class="btn btn-primary">
+            <span class="icon">📥</span> Download HD Post (PNG)
+          </button>
+          <button id="btnCopyCaption" class="btn btn-secondary">
+            <span class="icon">📋</span> Copy IG Caption
+          </button>
+        </div>
+      </section>
+
+      <!-- Right Column: Customization Controls -->
+      <section class="panel controls-panel">
+        <div class="panel-header">
+          <h2>⚙️ Post Customizer</h2>
+          <button id="btnResetDefault" class="btn-text">Reset</button>
+        </div>
+
+        <div class="controls-form">
+          <!-- Handle -->
+          <div class="form-group">
+            <label for="handleInput">Page Branding / Handle</label>
+            <input type="text" id="handleInput" value="@TODAYANIMENEWS" placeholder="@yourhandle">
+          </div>
+
+          <!-- Category Badge -->
+          <div class="form-group">
+            <label for="badgeTextInput">Category Badge</label>
+            <input type="text" id="badgeTextInput" value="OFFICIAL ANNOUNCEMENT">
+            
+            <div class="color-presets">
+              <span class="color-chip active" style="background:#E50914;" data-color="#E50914" title="Red / Breaking"></span>
+              <span class="color-chip" style="background:#FF4757;" data-color="#FF4757" title="Coral / Trailer"></span>
+              <span class="color-chip" style="background:#FFA502;" data-color="#FFA502" title="Orange / Release Date"></span>
+              <span class="color-chip" style="background:#9B59B6;" data-color="#9B59B6" title="Purple / Movie"></span>
+              <span class="color-chip" style="background:#2ED573;" data-color="#2ED573" title="Green / Season Sequel"></span>
+              <span class="color-chip" style="background:#1E90FF;" data-color="#1E90FF" title="Blue / Cast & Staff"></span>
+            </div>
+          </div>
+
+          <!-- News Headline -->
+          <div class="form-group">
+            <label for="titleInput">Headline (Title)</label>
+            <textarea id="titleInput" rows="3" placeholder="Enter bold anime news headline..."></textarea>
+          </div>
+
+          <!-- Excerpt -->
+          <div class="form-group">
+            <label for="excerptInput">Summary / Excerpt</label>
+            <textarea id="excerptInput" rows="3" placeholder="Brief summary of the news..."></textarea>
+          </div>
+
+          <!-- Source -->
+          <div class="form-group">
+            <label for="sourceInput">Source Name</label>
+            <input type="text" id="sourceInput" value="Anime News Network">
+          </div>
+
+          <!-- Image URL & Upload -->
+          <div class="form-group">
+            <label for="imageUrlInput">Anime Visual / Picture</label>
+            <input type="text" id="imageUrlInput" placeholder="https://example.com/anime.jpg">
+            
+            <div class="upload-box">
+              <label for="fileUpload" class="file-label">
+                📁 Upload Custom Image from Computer
+              </label>
+              <input type="file" id="fileUpload" accept="image/*" style="display:none;">
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- API Docs Modal -->
+    <div id="apiModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>⚡ AniNews REST API Documentation</h2>
+          <button id="btnCloseApiDocs" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">Use these REST API endpoints in your <b>Mobile App, Discord/Telegram Bot, Website, or Automation Scripts</b> to fetch news with auto-generated Instagram pictures!</p>
+
+          <div class="api-endpoint-card">
+            <div class="endpoint-badge get">GET</div>
+            <code>/api/v1/posts</code>
+            <p>Returns a list of anime news articles, each with its <b>direct generated post image URL</b>, caption, and metadata.</p>
+            <div class="code-block">
+              <code>fetch('http://localhost:3000/api/v1/posts?limit=10&handle=@mybrand')<br>  .then(res => res.json())<br>  .then(data => console.log(data.data));</code>
+            </div>
+          </div>
+
+          <div class="api-endpoint-card">
+            <div class="endpoint-badge get">GET</div>
+            <code>/api/v1/posts/latest/image</code>
+            <p>Directly returns the <b>actual PNG image</b> (image/png) of the latest breaking anime news post!</p>
+            <div class="code-block">
+              <code>&lt;img src="http://localhost:3000/api/v1/posts/latest/image?handle=@mybrand&ratio=4:5" alt="Anime Post" /&gt;</code>
+            </div>
+          </div>
+
+          <div class="api-endpoint-card">
+            <div class="endpoint-badge get">GET</div>
+            <code>/api/v1/posts/:id/image</code>
+            <p>Directly returns the <b>actual PNG image</b> for any specific article ID.</p>
+          </div>
+
+          <div class="api-endpoint-card">
+            <div class="endpoint-badge post">POST</div>
+            <code>/api/v1/generate-custom</code>
+            <p>Send your own custom <code>{ title, excerpt, image, handle, badge, ratio }</code> and receive the rendered PNG image directly!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Caption copied to clipboard!</div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

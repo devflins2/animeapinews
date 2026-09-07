@@ -1,0 +1,29 @@
+{
+  "name": "todayanimenews-post-generator",
+  "version": "1.0.0",
+  "description": "Instagram Anime News Post Generator in TodayAnimeNews Style powered by real-time anime news API",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "generate": "node cli-generate.js"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.65",
+    "axios": "^1.7.9",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "he": "^1.2.0",
+    "rss-parser": "^3.13.0"
+  },
+  "keywords": [
+    "anime",
+    "news",
+    "instagram",
+    "generator",
+    "todayanimenews"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}
